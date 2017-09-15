@@ -4,14 +4,16 @@ from tensorflow.examples.tutorials.mnist import input_data
 mnist = input_data.read_data_sets("/tmp/data/", one_hot=True)
 
 n_nodes_hl1= 600
-n_nodes_hl2= 400
-n_nodes_hl3= 200
+n_nodes_hl2= 500
+n_nodes_hl3= 400
 
 n_classes= 10
 batch_size = 100
 
 x= tf.placeholder('float', [None, 784]) #data
 y= tf.placeholder('float') #lables
+
+
 
 def neural_network_model(data):
 	hidden_1_layer= {'weights': tf.Variable(tf.random_normal([784, n_nodes_hl1])), 'biases': tf.Variable(tf.random_normal([n_nodes_hl1]))}
@@ -39,11 +41,10 @@ def neural_network_model(data):
 	
 def train_neural_network(x):
 	prediction = neural_network_model(x)
-	cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction,labels=y))
+	cost = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=prediction,labels=y))
 
 	optimizer= tf.train.AdamOptimizer().minimize(cost)
-
-	hm_epochs = 10 #feed forward and backProp
+	hm_epochs = 8 #feed forward and backProp
 
 	with tf.Session() as sess:
 		sess.run(tf.initialize_all_variables()) 
@@ -54,12 +55,14 @@ def train_neural_network(x):
 				epoch_x, epoch_y = mnist.train.next_batch(batch_size)
 				a, c= sess.run([optimizer, cost], feed_dict= {x:epoch_x, y:epoch_y})
 				epoch_loss +=c
-			print('Epoch:',epoch, ' completed out of: ', hm_epochs, ' loss:', epoch_loss)
+			print('Epoch:',epoch, ' Total_Epoch: ', hm_epochs, ' loss:', epoch_loss)
 
 		correct = tf.equal(tf.argmax(prediction,1), tf.argmax(y,1))
 		accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
-		print ('Accuracy:', accuracy.eval({x:mnist.test.images, y:mnist.test.labels}))
+		print ('Accuracy:', (accuracy.eval({x:mnist.test.images, y:mnist.test.labels}))*100, "%")
+
+if __name__ == "__main__":
+	train_neural_network(x)
 
 
-train_neural_network(x)
 
